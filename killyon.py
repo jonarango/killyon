@@ -4,6 +4,7 @@
 ########################################################
 
 import subprocess
+import sys
 import threading
 import ctypes
 import time
@@ -12,6 +13,8 @@ import os
 from colorama import init as colorama_init
 from colorama import Fore
 from colorama import Style
+
+from plyer import notification
 
 def block_firewall_port(port):
     rule_name = "Block_Port_" + str(port)
@@ -65,16 +68,27 @@ def main():
 
     if not is_admin:
         print(f"{Fore.LIGHTRED_EX}You need to run this script as administrator.{Style.RESET_ALL}")
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        sys.exit()
+
+    is_notified = False
 
     while True:
         is_monitored = check_monitor(None)
         if is_monitored:
+            notification.notify(
+                title = 'KillYon',
+                message = 'Someone seems to have started monitoring you.',
+                app_icon = None,
+                timeout = 5,
+            )
             print(f"{Fore.LIGHTRED_EX}Someone seems to have started monitoring you.{Style.RESET_ALL}")
             if 11200 in is_monitored:
                 block_firewall_port(11200)
             if 11100 in is_monitored:
                 block_firewall_port(11100)
             # control_service(True, "VeyonService")
+            is_notified = True
         else:
             print(f"{Fore.GREEN}No Veyon connections detected.{Style.RESET_ALL}")
             if not 11200 in is_monitored:
@@ -83,6 +97,7 @@ def main():
                 unblock_firewall_port(11100)
             # control_service(False, "VeyonService")
             # unblock_firewall_port(11200)
+            is_notified = True
         time.sleep(0.1)
 
 if __name__ == "__main__":
