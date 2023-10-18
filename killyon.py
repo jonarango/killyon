@@ -77,6 +77,10 @@ def main():
             # control_service(True, "VeyonService")
         else:
             print(f"{Fore.GREEN}No Veyon connections detected.{Style.RESET_ALL}")
+            if not 11200 in is_monitored:
+                unblock_firewall_port(11200)
+            if not 11100 in is_monitored:
+                unblock_firewall_port(11100)
             # control_service(False, "VeyonService")
             # unblock_firewall_port(11200)
         time.sleep(0.1)
