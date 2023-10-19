@@ -71,17 +71,26 @@ def main():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         sys.exit()
 
+    notification.notify(
+        title = 'KillYon',
+        message = 'KillYon has been started and now is running for your privacy.',
+        app_icon = None,
+        timeout = 5,
+    )
+
     is_notified = False
 
     while True:
         is_monitored = check_monitor(None)
         if is_monitored:
-            notification.notify(
-                title = 'KillYon',
-                message = 'Someone seems to have started monitoring you.',
-                app_icon = None,
-                timeout = 5,
-            )
+            if not is_notified:
+                notification.notify(
+                    title = 'KillYon',
+                    message = 'Someone seems to have started monitoring you.',
+                    app_icon = None,
+                    timeout = 5,
+                )
+
             print(f"{Fore.LIGHTRED_EX}Someone seems to have started monitoring you.{Style.RESET_ALL}")
             if 11200 in is_monitored:
                 block_firewall_port(11200)
@@ -91,13 +100,14 @@ def main():
             is_notified = True
         else:
             print(f"{Fore.GREEN}No Veyon connections detected.{Style.RESET_ALL}")
-            if not 11200 in is_monitored:
-                unblock_firewall_port(11200)
-            if not 11100 in is_monitored:
-                unblock_firewall_port(11100)
+            
+            if is_notified:
+                if not 11200 in is_monitored:
+                    unblock_firewall_port(11200)
+                if not 11100 in is_monitored:
+                    unblock_firewall_port(11100)
             # control_service(False, "VeyonService")
-            # unblock_firewall_port(11200)
-            is_notified = True
+            is_notified = False
         time.sleep(0.1)
 
 if __name__ == "__main__":
